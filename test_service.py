@@ -1,9 +1,17 @@
 import pytest
 import datetime
 import time
-from pancake.get_statistics import snake_case
+from pancake.pancake_service import get_statistics
 from pancake.pipeline.pages import transform, schema
 from db.bigquery import load
+from pancake.pipeline import pages
+
+
+@pytest.fixture
+def data():
+    pipeline = pages.define
+    data = pipeline.transform
+    return data
 
 
 @pytest.fixture
@@ -26,13 +34,8 @@ def name():
     return name
 
 
-def test_get_statistics(since, until, name):
-    snake_case(since, until, name)
+@pytest.fixture
+def endpoint():
+    endpoint = "statistics/pages"
+    return endpoint
 
-
-def test_transform(since, until, name):
-    transform(snake_case(since, until, name))
-
-
-def test_load(since, until, name):
-    load(transform(snake_case(since, until, name)), schema(), name)
