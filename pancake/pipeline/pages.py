@@ -48,6 +48,4 @@ def transform(rows):
     ]
 
 
-define = Pancake_statistics(
-    "pages", "statistics/pages", transform(get_statistics("statistics/pages")), schema()
-)
+define = Pancake_statistics("pages", "statistics/pages", transform, schema())

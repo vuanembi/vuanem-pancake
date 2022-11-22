@@ -1,13 +1,19 @@
 import time
 from datetime import datetime, timedelta
-from pancake.pipeline import pages
-from pancake.pancake_service import get_statistics
+from pancake.pipeline import (
+    pages,
+    tags,
+)
+from pancake.pancake_service import get_statistics, pancake_service
 from db.bigquery import load
-from pancake.pipeline.pages import transform, schema
+
+pipelines = [
+    pages.define,
+    tags.define,
+]
 
 if __name__ == "__main__":
-    pipeline = pages.define
-    data = pipeline.transform
-    name = pipeline.name
-    schema = pipeline.schema
-    load(data, schema, name)
+    since = input("Since: ")
+    until = input("Until: ")
+    for pipeline in pipelines:
+        pancake_service(pipeline, since, until)
