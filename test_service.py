@@ -39,3 +39,13 @@ def endpoint():
     endpoint = "statistics/pages"
     return endpoint
 
+def test_get_statistics(endpoint):
+    get_statistics(endpoint)
+
+
+def test_transform():
+    transform(get_statistics("statistics/pages"))
+
+
+def test_load(data, name):
+    load(data, schema(), name)

@@ -31,7 +31,6 @@ def transform(rows,_year):
             "customer_inbox_count": row.get("customer_inbox_count"),
             "_hour": (
                 datetime.strptime(row.get("hour"), "%Y-%m-%dT%H:%M:%S")
-                + timedelta(hours=-7)
             ).isoformat(timespec="seconds"),
             "inbox_interactive_count": row.get("inbox_interactive_count"),
             "new_customer_count": row.get("new_customer_count"),

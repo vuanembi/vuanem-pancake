@@ -14,8 +14,6 @@ def str_to_date(since, until):
     try:
         since = datetime.strptime(since, "%Y-%m-%d")
         until = datetime.strptime(until, "%Y-%m-%d")
-        since = since
-        until = until
     except:
         since = datetime.now() + timedelta(days=-5)
         until = datetime.now()
@@ -25,18 +23,22 @@ def str_to_date(since, until):
     if syear < uyear:
         while temp <= uyear:
             if temp == syear:
-                start = since + timedelta(days=1)
-                end = date(since.year, 12, 31) + timedelta(days=1)
+                start = since
+                end = datetime(since.year + 1, 1, 1, 0, 0, 0)
             elif temp == uyear:
-                start = date(until.year, 1, 1) + timedelta(days=1)
+                start = datetime(until.year, 1, 1)
                 end = until + timedelta(days=1)
             else:
-                start = date(temp.year, 1, 1) + timedelta(days=1)
-                end = date(temp.year, 12, 31) + timedelta(days=1)
+                start = datetime(temp.year, 1, 1)
+                end = datetime(temp.year + 1, 1, 1, 0, 0, 0)
+            start = start + timedelta(hours=7)
+            end = end + timedelta(hours=7)
             my_list = (start, end)
             rows.append(my_list)
             temp = temp + 1
     else:
+        since = since + timedelta(hours=7)
+        until = until + timedelta(hours=7)
         my_list = (since, until)
         rows.append(my_list)
     return rows
@@ -66,6 +68,7 @@ def get_statistics(endpoint, _since, _until):
 
 def pancake_service(pipeline: PancakeStatistics, _since, _until):
     rows = str_to_date(_since, _until)
+    print(rows)
     for row in rows:
         _year = row[0].year
         _date = parse_date(row[0], row[1])
