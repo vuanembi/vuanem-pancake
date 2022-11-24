@@ -1,6 +1,6 @@
 import requests
 import os
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 import time
 from pancake.pipeline.interface import PancakeStatistics
 from db.bigquery import load
@@ -10,44 +10,39 @@ page_id = "434513510026090"
 
 
 def str_to_date(since, until):
-    rows = []
     try:
         since = datetime.strptime(since, "%Y-%m-%d")
         until = datetime.strptime(until, "%Y-%m-%d")
     except:
         since = datetime.now() + timedelta(days=-5)
         until = datetime.now()
-    syear = since.year
-    temp = since.year
-    uyear = until.year
-    if syear < uyear:
-        while temp <= uyear:
-            if temp == syear:
-                start = since
-                end = datetime(since.year + 1, 1, 1, 0, 0, 0)
-            elif temp == uyear:
-                start = datetime(until.year, 1, 1)
-                end = until + timedelta(days=1)
-            else:
-                start = datetime(temp.year, 1, 1)
-                end = datetime(temp.year + 1, 1, 1, 0, 0, 0)
-            start = start + timedelta(hours=7)
-            end = end + timedelta(hours=7)
-            my_list = (start, end)
-            rows.append(my_list)
-            temp = temp + 1
+    years = list(range(since.year, until.year + 1))
+    if since.year < until.year:
+        rows = [
+            (
+                since.replace(tzinfo=timezone.utc),
+                datetime(years[1], 1, 1).replace(tzinfo=timezone.utc),
+            ),
+            *[
+                (
+                    datetime(year, 1, 1).replace(tzinfo=timezone.utc),
+                    datetime(year + 1, 1, 1).replace(tzinfo=timezone.utc),
+                )
+                for year in years[1:-1]
+            ],
+            (
+                datetime(years[-1], 1, 1).replace(tzinfo=timezone.utc),
+                (until + timedelta(days=1)).replace(tzinfo=timezone.utc),
+            ),
+        ]
     else:
-        since = since + timedelta(hours=7)
-        until = until + timedelta(hours=7)
-        my_list = (since, until)
-        rows.append(my_list)
+        rows = [
+            (
+                since.replace(tzinfo=timezone.utc),
+                (until + timedelta(days=1)).replace(tzinfo=timezone.utc),
+            )
+        ]
     return rows
-
-
-def parse_date(since: str, until: str) -> tuple:
-    since = int(time.mktime(since.timetuple()))
-    until = int(time.mktime(until.timetuple()))
-    return (since, until)
 
 
 def get_statistics(endpoint, _since, _until):
@@ -71,8 +66,9 @@ def pancake_service(pipeline: PancakeStatistics, _since, _until):
     print(rows)
     for row in rows:
         _year = row[0].year
-        _date = parse_date(row[0], row[1])
-        result = get_statistics(pipeline.endpoint, _date[0], _date[1])
+        _since = int(row[0].timestamp())
+        _until = int(row[1].timestamp())
+        result = get_statistics(pipeline.endpoint, _since, _until)
         data = pipeline.transform(result, _year)
         name = pipeline.name
         schema = pipeline.schema
