@@ -1,4 +1,4 @@
-from pancake.pipeline.define import Pancake_statistics
+from pancake.pipeline.interface import PancakeStatistics
 from typing import Any
 import time
 from datetime import datetime, timedelta
@@ -24,7 +24,7 @@ def schema() -> list[dict[str, Any]]:
     return _schema
 
 
-def transform(rows):
+def transform(rows,_year):
     return [
         {
             "customer_comment_count": row.get("customer_comment_count"),
@@ -48,4 +48,4 @@ def transform(rows):
     ]
 
 
-define = Pancake_statistics("pages", "statistics/pages", transform, schema())
+define = PancakeStatistics("pages", "statistics/pages", transform, schema())

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Pancake_statistics:
+class PancakeStatistics:
     name: str
     endpoint: str
     transform: list[dict[str, Any]]

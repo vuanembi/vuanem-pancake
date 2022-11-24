@@ -1,13 +1,12 @@
-from pancake.pipeline.define import Pancake_statistics
+from pancake.pipeline.interface import PancakeStatistics
 from typing import Any
 import time
 from datetime import datetime, timedelta
-from pancake.pancake_service import get_statistics
 
 
 def schema() -> list[dict[str, Any]]:
     _schema = [
-        {"name": "categories", "type": "STRING"},
+        {"name": "categories", "type": "TIMESTAMP"},
         {
             "name": "series",
             "type": "record",
@@ -18,11 +17,12 @@ def schema() -> list[dict[str, Any]]:
                 {"name": "total", "type": "INT64"},
             ],
         },
+        {"name": "_batched_at", "type": "TIMESTAMP"},
     ]
     return _schema
 
 
-def transform(rows):
+def transform(rows, _year):
     rows_to_insert = []
     for i in range(0, len(rows["categories"])):
         series = []
@@ -36,13 +36,16 @@ def transform(rows):
             total = a["total"]
             my_dict = {"tag": tag, "pin": pin, "total": total}
             series.append(my_dict)
-        dict = {
-            "categories": c[i],
+        _categories = c[i] + "/" + str(_year)
+        _categories = datetime.strptime(_categories, "%d/%m/%Y")
+        _categories = _categories.isoformat(timespec="seconds")
+        _dict = {
+            "categories": _categories,
             "series": series,
+            "_batched_at": datetime.now().isoformat(timespec="seconds"),
         }
-        rows_to_insert.append(dict)
+        rows_to_insert.append(_dict)
     return rows_to_insert
 
 
-define = Pancake_statistics("tags", "statistics/tags", transform, schema())
-
+define = PancakeStatistics("tags", "statistics/tags", transform, schema())
