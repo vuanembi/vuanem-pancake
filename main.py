@@ -12,8 +12,11 @@ pipelines = [
     tags.define,
 ]
 
-if __name__ == "__main__":
-    since = input("Since: ")
-    until = input("Until: ")
+def main(request):
+    request_json = request.get_json()
+    since = request_json.get('since')
+    until = request_json.get('until')
+    print(since, until)
     for pipeline in pipelines:
         pancake_service(pipeline, since, until)
+    return 'OK'
