@@ -2,8 +2,7 @@ import pytest
 import datetime
 import time
 from pancake.pancake_service import get_statistics, str_to_date
-from pancake.pipeline.pages import transform, schema
-from db.bigquery import load
+from pancake.pipeline.pages import transform
 from pancake.pipeline import pages
 
 

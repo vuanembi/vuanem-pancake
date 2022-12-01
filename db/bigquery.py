@@ -1,8 +1,5 @@
 from google.cloud import bigquery
 from typing import Any
-import datetime
-from datetime import datetime, timedelta
-import time
 
 
 client = bigquery.Client()

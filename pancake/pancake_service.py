@@ -1,6 +1,6 @@
 import requests
 import os
-from datetime import datetime, timedelta, date, timezone
+from datetime import datetime, timedelta, timezone
 import time
 from pancake.pipeline.interface import PancakeStatistics
 from db.bigquery import load

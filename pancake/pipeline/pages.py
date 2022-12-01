@@ -1,8 +1,6 @@
 from pancake.pipeline.interface import PancakeStatistics
 from typing import Any
-import time
-from datetime import datetime, timedelta
-from pancake.pancake_service import get_statistics
+from datetime import datetime
 
 
 def schema() -> list[dict[str, Any]]:

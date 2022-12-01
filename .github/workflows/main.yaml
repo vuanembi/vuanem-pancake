@@ -1,0 +1,73 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [master]
+  
+env:
+  ENV_KEY: env-vars
+  ENV_FILE: env.yaml
+  GCP_SA: bivuanem@voltaic-country-280607.iam.gserviceaccount.com
+
+jobs:
+  set-env:
+    runs-on: windows-latest
+    outputs:
+      fn-name: ${{ steps.set-fn-name.outputs.fn-name }}
+    steps:
+      - name: Set env vars
+      run: |
+        echo "FUNCTION_NAME=vuanem-pancake" >> $GITHUB_ENV
+        echo "PUBLIC_URL=https://us-central1-voltaic-country-280607.cloudfunctions.net/pancake" >> $GITHUB_ENV
+
+      - id: set-fn-name
+        name: Set function name
+        run: echo "::set-output name=fn-name::${{ env.FUNCTION_NAME }}"
+
+      - run: |
+          echo "PANCAKE_TOKEN: ${{ secrets.PANCAKE_TOKEN }}" >> ${{ env.ENV_FILE }}
+          echo "GCP_SA: ${{ env.GCP_SA }}" >> ${{ env.ENV_FILE }}
+          echo "PUBLIC_URL: ${{ env.PUBLIC_URL }}" >> ${{ env.ENV_FILE }}
+          
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.ENV_KEY }}
+          path: ${{ env.ENV_FILE }}
+
+  
+  deploy:
+    runs-on: windows-latest
+    needs: set-env 
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: ${{ env.ENV_KEY }}
+
+      - uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v0
+
+      - run: >-
+          gcloud functions deploy ${{ needs.set-env.outputs.fn-name }}
+          --entry-point=main
+          --region=us-central1
+          --runtime=python39
+          --trigger-http
+          --service-account=${{ env.GCP_SA }}
+          --env-vars-file=${{ env.ENV_FILE }}
+  
+  clean-up:
+    runs-on: windows-latest
+    needs: deploy
+    steps:
+      - run: echo "" > ${{ env.ENV_FILE }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.ENV_KEY }}
+          path: ${{ env.ENV_FILE }}
