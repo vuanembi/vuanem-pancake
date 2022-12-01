@@ -20,7 +20,7 @@ jobs:
       - name: Set env vars
         run: |
           echo "FUNCTION_NAME=vuanem-pancake" >> $GITHUB_ENV
-          echo "PUBLIC_URL=https://us-central1-voltaic-country-280607.cloudfunctions.net/pancake" >> $GITHUB_ENV
+          echo "PUBLIC_URL=https://us-central1-voltaic-country-280607.cloudfunctions.net/vuanem-pancake" >> $GITHUB_ENV
 
       - id: set-fn-name
         name: Set function name
